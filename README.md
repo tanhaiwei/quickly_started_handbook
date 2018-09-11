@@ -1,3 +1,20 @@
-# My Awesome Book
+# 快速使用产品手册
 
-This file file serves as your book's preface, a great place to describe your book's content and ideas.
+欢迎使用datatist预测营销云。
+
+本手册帮助您快速学习使用datatist预测营销云。
+
+快速入门
+
+数据接入
+
+数据模型
+
+功能介绍
+
+* 事件分析
+
+
+
+
+
