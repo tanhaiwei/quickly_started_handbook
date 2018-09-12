@@ -6,5 +6,7 @@
 * [数据模型](shu-ju-mo-xing.md)
 * [功能介绍](gong-neng-jie-shao.md)
   * [事件分析](shi-jian-fen-xi.md)
+  * [看板](kan-ban.md)
+  * [行为路径](xing-wei-lu-jing.md)
   * [数据管理](shu-ju-guan-li.md)
 
