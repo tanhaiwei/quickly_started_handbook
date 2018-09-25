@@ -1,43 +1,33 @@
 ## 1.安装SDK {#1安装sdk}
 
-如果要跟踪H5页面访问，需要在跟踪的页面的&lt;Head&gt;或者&lt;footer&gt;内加上Datatist跟踪码，判断有userID时，请设置userID。初始化跟踪代码如下：
+下载[微信小程序sdk](http://datatist.com/sourcefile/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8Fsdk.zip)创建datatist文件夹，并将datatist.js文件放入datatist文件夹中。
+
+在应用口app.js第一行加入如下代码，其他页面调用apiqia前，也需要先获取datatist对象：
 
 ```
-<
-script type="text/javascript"
->
-​
-    window.dtTracker=window.dtTracker||function(){(dtTracker.q=dtTracker.q||[]).push(arguments)};  
-    dtTracker.l=+new Date;    
-    dtTracker('setTrackApiUrl', 'https://tracker.datatist.com/c.gif');  
-    dtTracker('setSiteId', '营销云上创建应用的siteid');
-    //dtTracker('setOSiteId', 'xxx');//接入数据云1.0才需要设置
-    dtTracker('setProjectId', '营销云-项目管理中的项目ID');
-    //登录或注册成功时cookie或local中有userid，则需设置userID；没有则不设置  
-    dtTracker('setUserId', 'xxxx'); 
-    dtTracker('pageview');//页面捕捉，必须放在设置userID后面
-​
-    (function() {  
-        var d = document,  
-            g = d.createElement('script'),  
-            s = d.getElementsByTagName('script')[0];  
-    g.type = 'text/javascript';  
-    g.async = true;  
-    g.defer = true;  
-    g.src = 'https://tracker.datatist.com/tracker.min.js';  
-    s.parentNode.insertBefore(g,s)  
-    })();  
-​
-<
-/script
->
+var datatist = require('datatist/datatist.min.js')
 ```
 
-**营销云数据开关，控制营销云的数据传输，可用于灰度测试，限流分流等：**  
-
+在应用入口app.js的App.onLaunch方法调用如下代码作为初始化：
 
 ```
- dtTracker('setEnable', true);
+datatist.App.init({
+      // appID为应用ID，必须填写
+      "appID": "xxxxxxx",
+      "url_v2": "https://tracker.datatist.com/c.gif",
+      "siteId_v2": "营销云-应用管理中的siteId",
+      "projectId": "营销云-项目管理中的项目ID",
+      //当前小程序的版本号
+      "version": "xx.xx.xx",
+      //日志开关
+      "log":false
+    });
+```
+
+**营销云数据开关，控制营销云的数据传输，可用于灰度测试，限流分流等：**
+
+```
+datatist.setEnable(true);
 ```
 
 ## 2.基础配置 {#2基础配置}
@@ -47,23 +37,28 @@ script type="text/javascript"
 使用userID可以帮助Tracker收集同用户在不同设备和浏览器上的信息，以长期定位追踪用户信息以及支持跨设备和浏览器行为的关联。userID是一个非空的字符串，比如用户名，邮箱地址，手机号 等唯一识别此用户。userID在不同设备和浏览器上必须是相同的。可以将userID进行加密后进行传输。
 
 ```
-dtTracker('setUserId', 'xxxx');
+var datatist = require('../../datatist/datatist.js')
+​
+datatist.setUserId("your_userid");
 ```
-
-建议设置userID的位置如下：
-
-* 在初始化SDK时，判断cookie或local中是否有userID，有则设置，没有则不设置
 
 **用户属性**
 
-数据云-元事件管理中的自定义用户属性，调用如下api进行设置。之后的api将会带上这些属性，退出登录api会清除用户属性和userID
+数据云-元事件管理中的自定义用户属性，任意api都可以调用**setUserProperty**设置用户属性，将参数存入**JSON**对象中传递。之后的api将会带上这些属性，退出登录api会清除用户属性和userID
 
 ```
-var mjson={  
-"数据云-元事件管理中的用户属性1":"参数1",
-"数据云-元事件管理中的用户属性2":"参数2"
-};  
-dtTracker('setUserProperty', mjson);
+setUserProperty: function (udVariable, callback)
+```
+
+**参数说明：**
+
+1. udVariable:营销云-元数据管理中定义的用户属性，以JSON对象的形式进行存储；
+
+```
+var udVariable = { 
+"营销云-元数据管理中定义的用户属性": "xxx"
+};
+datatist.setUserProperty(udVariable, this.callback)
 ```
 
 **页面采集**
@@ -73,26 +68,34 @@ dtTracker('setUserProperty', mjson);
 **接口声明：**
 
 ```
-trackPageview(udVariable : object,callback: function|option)
+trackPageview: function (title, udVariable, callback)
 ```
 
 **参数说明：**
 
-1.udVariable: 客户可扩展的自定义变量，以JSON对象的形式进行存储；
+1. title: 页面标题;
 
-示例：
+2. udVariable: 客户可扩展的自定义变量，以JSON对象的形式进行存储;
+
+3. callback: 回调接口，暂不支持，直接传null;
 
 ```
 //进入某页面时采集所需数据
-var mjson={  
+var udVariable={  
 "XXXXX":"XXXX"  
 };
-dtTracker('pageview',mjson);
+datatist.trackPageview("页面名称",udVariable, null);
 ```
 
-建议设置页面采集的位置如下：
+**添加请求服务器域名：**
 
-初始化代码中已默认调用页面捕获接口。
+需要在微信小程序里事先设置一个通讯域名，允许sdk数据传输
+
+1. 登陆微信小程序后台，进入设置菜单
+
+2. 打开开发设置，配置服务器域名
+
+3. 在request合法域名中添加：[https://tracker.datatist.com](https://tracker.datatist.com/)​
 
 ## 3.事件配置 {#3事件配置}
 
@@ -103,10 +106,10 @@ dtTracker('pageview',mjson);
 **接口声明：**
 
 ```
-trackSearch (keyword: string, recommendationSearchFlag: boolean, historySearchFlag: boolean, udVariable : object, callback: function|option)
+trackSearch: function (keyword, recommendationSearchFlag, historySearchFlag, udVariable, callback)
 ```
 
-**参数说明：仅udVariable可缺省，其他参数没有则传空字符串**
+**参数说明：其他参数没有值则传空字符串**
 
 1.keyword：搜索关键词
 
@@ -116,16 +119,17 @@ trackSearch (keyword: string, recommendationSearchFlag: boolean, historySearchFl
 
 4.udVariable: 客户可扩展的自定义变量，以JSON对象的形式进行存储；
 
+5.callback: 回调接口，暂不支持，直接传null;
+
 示例：
 
 ```
 //点击搜索按钮时，采集搜索数据  
-//若无非必传项，可直接调用trackSearch("搜索的关键词");  
-var mjson={  
+var udVariable={  
 "活动":"水果大促销",  
 "XXXXX":"XXXX"  
 };  
-dtTracker('search','火龙果',false,false,mjson);
+datatist.trackSearch("纽约时报畅销书", true, false, udVariable, null);
 ```
 
 ### 3.2用户注册 {#32用户注册}
@@ -135,10 +139,10 @@ dtTracker('search','火龙果',false,false,mjson);
 **接口声明：**
 
 ```
-trackRegister (userid: string, type: string, authenticated: boolean, udVariable: object , callback: function|option)
+trackRegister: function (userid, type, authenticated, udVariable, callback)
 ```
 
-**参数说明：仅udVariable可缺省，其他参数没有则传空字符串**
+**参数说明：其他参数没有值则传空字符串**
 
 1.userid: 用户注册的用户ID；
 
@@ -148,15 +152,17 @@ trackRegister (userid: string, type: string, authenticated: boolean, udVariable:
 
 4.udVariable: 客户可扩展的自定义变量，以JSON对象的形式进行存储；建议：传注册来源
 
+5.callback: 回调接口，暂不支持，直接传null;
+
 示例：
 
 ```
 //用户注册成功时，采集注册信息  
-var mjson={  
+var udVariable={  
 "用户公司":"datatist",  
 "注册来源":"XX第三方授权"  
 };  
-dtTracker('register','yourUserId','企业用户',true,mjson);
+datatist.trackRegister(userid, type, authenticated, udVariable, null);
 ```
 
 ### 3.3用户登录 {#33用户登录}
@@ -166,37 +172,67 @@ dtTracker('register','yourUserId','企业用户',true,mjson);
 **接口声明：**
 
 ```
-trackLogin (userid:string,udVariable:object, callback:function|option)
+trackLogin: function (userid, udVariable, callback)
 ```
 
-**参数说明：仅udVariable可缺省，其他参数没有则传空字符串**
+**参数说明：其他参数没有值则传空字符串**
 
 1.userid: 用户ID
 
 2.udVariable: 客户可扩展的自定义变量，以JSON对象的形式进行传输；建议：传登录来源
 
+3.callback: 回调接口，暂不支持，直接传null;
+
 示例：
 
 ```
 //用户登录成功时，采集用户信息
-var mjson={
+var udVariable={
 "用户类型":"企业用户",
 "登录来源":"XX第三方授权"
 };
-dtTracker('login','yourUserId',mjson);
+datatist.trackLogin(userid, udVariable, null);
 ```
 
-### 3.4**产品访问页** {#34产品访问页}
+### 3.4用户登出 {#33用户登录-1}
+
+说明：用户登出成功的回调中，清除userID并通知服务器，可以用JSON添加自定义变量。
+
+**接口声明：**
+
+```
+trackLogout: function (userid, udVariable, callback)
+```
+
+**参数说明：其他参数没有值则传空字符串**
+
+1.userid: 用户ID
+
+2.udVariable: 客户可扩展的自定义变量，以JSON对象的形式进行传输；建议：传登录来源
+
+3.callback: 回调接口，暂不支持，直接传null;
+
+示例：
+
+```
+var udVariable={
+"用户类型":"企业用户",
+"登录来源":"XX第三方授权"
+};
+datatist.trackLogout(userid, udVariable, null);
+```
+
+### 3.5**产品访问页** {#34产品访问页}
 
 说明：进入商品详情页后调用，采集商品信息，可以用JSON添加自定义变量。
 
 **接口声明：**
 
 ```
-trackProductPage (sku:string, category1:String, catgory2:String, category3:String, originalPrice:double, realPrice:double, udVariable:object, callback: function|option)
+trackProductPage: function (sku, productCategory1, productCategory2, productCategory3, productOriginalPrice, productRealPrice, udVariable, callback)
 ```
 
-**参数说明：仅udVariable可缺省，其他参数没有则传空字符串**
+**参数说明：其他参数没有值则传空字符串**
 
 1.sku:页面产品的SKU信息；
 
@@ -212,24 +248,26 @@ trackProductPage (sku:string, category1:String, catgory2:String, category3:Strin
 
 7.udVariable:客户可扩展的自定义变量，以JSON对象的形式进行传输；
 
+8.callback: 回调接口，暂不支持，直接传null;
+
 示例：
 
 ```
 //进入商品详情页后，采集商品信息
-var mjson={
+var udVariable={
 "参与活动":"XX促销"
 };
-dtTracker('productPage','skuxxxx','果蔬','柑橘类','澳大利亚脐橙',100.0,98.0,mjson);
+datatist.trackProductPage('skuxxxx','果蔬','柑橘类','澳大利亚脐橙',100.0,98.0,udVariable,null);
 ```
 
-### 3.5加入购物车 {#35加入购物车}
+### 3.6加入购物车 {#35加入购物车}
 
 说明：点击加入购物车按钮时调用，采集加入购物车的商品信息，可以用JSON添加自定义变量。
 
 **接口声明：仅udVariable可缺省，其他参数没有则传空字符串**
 
 ```
-trackAddCart (sku:string,quantity:int, realPrice:double, udVariable:object, callback: function|option)
+trackAddCart: function (sku, productQuantity, productRealPrice, udVariable, callback)
 ```
 
 **参数说明：**
@@ -242,29 +280,31 @@ trackAddCart (sku:string,quantity:int, realPrice:double, udVariable:object, call
 
 4.udVariable:客户可扩展的自定义变量，以JSON对象的形式进行传输；
 
+5.callback: 回调接口，暂不支持，直接传null;
+
 示例：
 
 ```
 //点击加入购物车按钮时调用
-var mjson={
+var udVariable={
 "商品类型":"买一赠一活动商品"
 };
-dtTracker('addCart','skuxxxx',2,10.0,mjson);
+datatist.trackAddCart('skuxxxx',2,10.0,udVariable, null);
 ```
 
-### 3.6生成订单 {#36生成订单}
+### 3.7生成订单 {#36生成订单}
 
 说明：提交订单时调用，设置订单中的必要参数，采集订单信息，可以用JSON添加自定义变量。
 
 **接口声明：**
 
 ```
-trackOrder (orderInfo: object, couponInfo: object, productInfo: object, udVariable: object , callback: function|option)
+trackOrder: function (orderInfo, couponInfo, productInfo, udVariable, callback)
 ```
 
 **参数说明：仅udVariable可缺省，其他参数没有则传空字符串，orderInfo,productInfo不能传空**
 
-1.orderInfo: 订单信息，是一个JSON对象，其中包含项5项具体的参数：
+1.orderInfo: 订单信息，是一个JSON数组，其中包含项5项具体的参数：
 
 * orderID: string订单号
 
@@ -297,6 +337,8 @@ trackOrder (orderInfo: object, couponInfo: object, productInfo: object, udVariab
 * productSourceSku: string 活动商品来源（例如赠品产品。传原商品sku，标识原商品的绑定关系）
 
 4.udVariable: 客户可扩展的自定义变量，以JSON对象的形式进行传输。
+
+5.callback: 回调接口，暂不支持，直接传null;
 
 示例：
 
@@ -342,20 +384,20 @@ var productInfo =
     }
     ]；  
 //提交订单  
-var mjson={  
+var udVariable={  
 "参与活动":"免配送费"  
 };  
-dtTracker('order',orderInfo ,couponInfo ,productInfo ,mjson);
+datatist.trackOrder(orderInfo, couponInfo, productInfo, udVariable, null);
 ```
 
-### 3.7支付订单 {#37支付订单}
+### 3.8支付订单 {#37支付订单}
 
 说明：支付成功时调用，采集支付信息，可以用JSON添加自定义变量。
 
 **接口声明：**
 
 ```
-trackPayment (orderID:string, payMethod:string, payStatus:boolean, payAMT:double, udVariable:object, callback: function|option)
+trackPayment: function (orderID, payMethod, payStatus, payAMT, udVariable, callback)
 ```
 
 **参数说明：仅udVariable可缺省，其他参数没有则传空字符串**
@@ -370,24 +412,26 @@ trackPayment (orderID:string, payMethod:string, payStatus:boolean, payAMT:double
 
 5.udVariable:客户可扩展的自定义变量，以JSON对象的形式进行传输；
 
+6.callback: 回调接口，暂不支持，直接传null;
+
 示例：
 
 ```
 //支付成功时，记录支付信息
-var mjson={  
+var udVariable={  
 "自定义名称":"自定义参数"
 };  
-dtTracker('payment','订单ID','xx网银',true,18.2,mjson);
+datatist.trackPayment('订单ID','xx网银',true,18.2,udVariable, null);
 ```
 
-### 3.8预充值 {#38预充值}
+### 3.9预充值 {#38预充值}
 
 说明：充值成功时调用，采集充值信息，可以用JSON添加自定义变量。
 
 **接口声明：**
 
 ```
-trackPreCharge (chargeAMT:double, chargeMethod:string, couponAMT:double, payStatus:boolean, udVariable:object, callback: function|option)
+trackPreCharge: function (chargeAMT, chargeMethod, couponAMT, payStatus, udVariable, callback)
 ```
 
 **参数说明：仅udVariable可缺省，其他参数没有则传空字符串**
@@ -402,104 +446,100 @@ trackPreCharge (chargeAMT:double, chargeMethod:string, couponAMT:double, payStat
 
 5.udVariable:客户可扩展的自定义变量，以JSON对象的形式进行传输；
 
+6.callback: 回调接口，暂不支持，直接传null;
+
 示例：
 
 ```
 //充值成功时，记录充值信息
-var mjson={  
+var udVariable={  
 "参与活动":"充100得120"
 };  
-dtTracker('preCharge',100.0,'xx网银',20.0,true,mjson);
+datatist.trackPreCharge(100.0,'xx网银',20.0,true,udVariable, null);
 ```
 
-### 3.9退出登录 {#38预充值-1}
+### 3.10退出登录 {#38预充值-1}
 
 说明：退出登录回调中调用，采集用户 退出登录 行为数据，登出后的后续行为归为访客行为
 
 **接口声明：**
 
 ```
-trackLogout(udVariable: object,callback: function|option)
+trackLogout: function (userid, udVariable, callback)
 ```
 
 **参数说明：仅udVariable可缺省，其他参数没有则传空字符串**
 
-1.udVariable:客户可扩展的自定义变量，以JSON对象的形式进行传输；
+1.userid:用户ID
+
+2.udVariable:客户可扩展的自定义变量，以JSON对象的形式进行传输；
+
+3.callback: 回调接口，暂不支持，直接传null;
 
 示例：
 
 ```
-var mjson={  
-"自定义事件":"自定义参数"
-};  
-dtTracker('logout', mjson);
+var udVariable = {
+"自定义参数": "自定义变量"
+};
+datatist.trackLogout(userid, udVariable, null);
 ```
 
 ## 4.自定义事件 {#4自定义事件}
 
-### 4.1 自定义事件 {#41自定义事件}
+### 4.1自定义事件 {#41自定义事件}
 
 说明：在任意位置添加采集代码，记录用户行为或其他你所关注的数据，可以用JSON添加自定义变量。
 
 **接口声明：**
 
 ```
-customerTrack(eventName: string,udVariable: object,callback: function|option)
+customerTrack: function (eventName, udVariable, callback)
 ```
 
 **参数说明：仅udVariable可缺省，其他参数没有则传空字符串**
 
-1.eventName:数据云-元事件管理中定义的事件标识符，由英文大小写字母、数字、下划线组成；
+1.eventName:事件名称；
 
-2.udVariable: 数据云-元事件管理中的事件属性，以JSON对象的形式进行传输；
+2.udVariable: 客户可扩展的自定义变量，以JSON对象的形式进行传输；
+
+3.callback: 回调接口，暂不支持，直接传null;
 
 示例：
 
 ```
 //可以在任意位置记录用户行为或其他数据  
-var mjson={  
-"数据云-元事件管理中的事件属性":"参数"
+var udVariable={  
+"数据云-元事件管理中定义的事件属性":"xxx" 
 };  
-dtTracker('customerTrack', '数据云-元事件管理中的事件标识符', mjson);
+datatist.customerTrack('数据云-元事件管理中定义的事件标识符',udVariable, null);
 ```
 
-## ​ {#4自定义事件-1}
+## 5.版本更新说明 {#4自定义事件-1}
 
-## 5.版本更新说明 {#4自定义事件-2}
+版本2.2.2：
+
+1. 压缩加密sdk
 
 版本2.2.1：
 
-1. 新增 设置项目ID api
+1. 修复部分bug
 
-2. 更新 自定义事件api
+2. 性能优化
 
 版本2.2.0：
 
-1. 新增 代码业务埋点api
+1. 新增projectId设置
 
-2. 新增 设置用户属性api
+2. 新增设置用户属性 setUserProperty api
 
-3. 新增 全埋点功能
-
-4. 新增 全埋点忽略元素api
-
-5. 新增 全埋点设置上报元素属性api
-
-6. 新增 全埋点开关api
+3. 更新自定义事件API
 
 版本2.1.6：
 
 1. 新增 营销云数据开关功能
 
-2. 优化 与ios的UIWebview和WKWebview交互
-
-版本2.1.5：
-
-1. 新增 页面数据自动采集功能
-
-2. 新增 JS与APP数据打通功能
-
-3. 增加退出登录api
+2. 新增 退出登录api
 
 
 
