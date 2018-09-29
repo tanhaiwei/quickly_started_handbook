@@ -11,7 +11,7 @@ buildscript {
     dependencies {
         ...
         //datatist-android-plugin
-        classpath 'com.datatist.android:gradle-plugin:1.0.1'
+        classpath 'com.datatist.android:gradle-plugin:1.1.0'
     }
 }
 allprojects {
@@ -38,85 +38,44 @@ android {
 ...
 dependencies {
     ...
-    implementation 'com.datatist.android:DatatistSdk:2.2.3'
+    implementation 'com.datatist.android:DatatistSdk:2.2.4'
 }
 ```
 
 3.AndroidManifest.xml 配置
 
 ```
-<
-manifest 
-<
-uses-permission android:name="android.permission.INTERNET"/
->
-<
-uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/
->
-<
-uses-permission android:name="android.permission.READ_PHONE_STATE" /
->
-<
-uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /
->
-<
-uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /
->
-<
-application
+<manifest 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    
+<application
     android:name=".MyApplication"
     android:allowBackup="true"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name"
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
-    android:theme="@style/AppTheme"
->
-<
-activity android:name=".MainActivity"
->
-<
-intent-filter
->
-<
-action android:name="android.intent.action.MAIN" /
->
-<
-category android:name="android.intent.category.LAUNCHER" /
->
-<
-/intent-filter
->
-<
-!--请添加这里的整个 datatist_url_scheme intent-filter 区块 --
->
-<
-intent-filter
->
-<
-data android:scheme="@string/datatist_url_scheme"/
->
-<
-action android:name="android.intent.action.VIEW" /
->
-<
-category android:name="android.intent.category.DEFAULT" /
->
-<
-category android:name="android.intent.category.BROWSABLE" /
->
-<
-/intent-filter
->
-<
-!--请添加这里的整个 datatist_url_scheme intent-filter 区块 --
->
-<
-/activity
->
-<
-/manifest
->
+    android:theme="@style/AppTheme">
+    <activity android:name=".MainActivity">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        
+        <!--请添加这里的整个 datatist_url_scheme intent-filter 区块 -->
+        <intent-filter>
+            <data android:scheme="@string/datatist_url_scheme"/>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+        </intent-filter>
+       <!--请添加这里的整个 datatist_url_scheme intent-filter 区块 -->
+</activity>
+</manifest>
 ```
 
 4.SDK 中会使用到SwitchCompat、TabLayout、RecyclerView控件，以及`@NonNull`被用来标注给定的参数或者返回值不能为`null`。需要添加以下依赖\( 如果项目中已引入了，可以不添加 \)：
@@ -136,7 +95,9 @@ implementation 'com.android.support:design:25.4.0'
 
 * 如果 API 低于14 将不能采集`Activity`和`Fragment`的`pageView`事件，以及可视化定义功能。
 
-**注意事项：**运行时出现`Verification error in java.lang.Object org.datatist.sdk.autotrack.aspectj.FragmentAspectj`。 在`gradle.properties`中添加`android.enableD8=false`禁用 D8 的新编译器；
+**注意事项：**
+
+运行时出现`Verification error in java.lang.Object org.datatist.sdk.autotrack.aspectj.FragmentAspectj`。 在`gradle.properties`中添加`android.enableD8=false`禁用 D8 的新编译器；
 
 ## 初始化SDK {#初始化sdk}
 
@@ -281,10 +242,7 @@ Datatist.setAutoTrackGPS(true);
 -dontwarn org.datatist.sdk.**
 ​
 -keep class **.R$* {
-<
-fields
->
-;
+    <fields>;
 }
 -keepnames class * implements android.view.View$OnClickListener
 -keepnames class * extends android.view.View
@@ -315,14 +273,8 @@ fields
 -dontwarn android.databinding.**
 -keep class android.databinding.** { *; }
 -keep class 您项目的包名.databinding.** {
-<
-fields
->
-;
-<
-methods
->
-;
+    <fields>;
+    <methods>;
 }
 ```
 
