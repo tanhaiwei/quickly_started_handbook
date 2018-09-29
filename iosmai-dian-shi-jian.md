@@ -9,11 +9,7 @@
 不想采集的页面，需要添加类名到忽略数组中，把你要忽略页面的类名添加到NSArray数组中
 
 ```
-[[DatatistTracker sharedInstance] trackForbiddenController:
-<
-#(NSArray *)#
->
-;
+[[DatatistTracker sharedInstance] trackForbiddenController:<#(NSArray *)#>;
 ```
 
 建议:

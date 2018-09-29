@@ -43,10 +43,7 @@ pod install
 ```
 #ifndef DatatistTracker_Bridging_Header_h
 #define DatatistTracker_Bridging_Header_h
-#import 
-<
-DatatistTracker/DatatistTracker.h
->
+#import <DatatistTracker/DatatistTracker.h>
 #endif /* DatatistTracker_Bridging_Header_h */
 ```
 
@@ -64,11 +61,11 @@ DatatistTracker/DatatistTracker.h
 
 在需要追踪APP target的Build Setting下，搜索other，将其other linker flags 改成-ObjC。
 
-![](https://blobscdn.gitbook.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LMPwjXDZfLsn8Vzx6N6%2F-LNDiy3x05E1aLlmLSEk%2F-LNDkFUh21p9_0iik5fa%2FObjC%E5%8F%82%E6%95%B0.png?alt=media&token=91bcd1a3-b3f3-4efb-a7dd-12f65df2fe76)
+![](https://blobscdn.gitbook.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LMPwjXDZfLsn8Vzx6N6%2F-LNDiy3x05E1aLlmLSEk%2F-LNDkFUh21p9_0iik5fa%2FObjC参数.png?alt=media&token=91bcd1a3-b3f3-4efb-a7dd-12f65df2fe76)
 
-在需要追踪APP target的Build Setting下，搜索header search paths，将其参数指定为之前include文件夹对应放置的路径。如果是放置在根目录下，则指定为${SOURCE\_ROOT}/include路径。如果是放置到其他位置，则可以根据实际放置的路径设定参数。![](https://tanhaiwei.gitbooks.io/test/content/assets/iOS_2.png)​
+在需要追踪APP target的Build Setting下，搜索header search paths，将其参数指定为之前include文件夹对应放置的路径。如果是放置在根目录下，则指定为${SOURCE\_ROOT}/include路径。如果是放置到其他位置，则可以根据实际放置的路径设定参数。​
 
-转到Build Phases设置下,在Link Binary With Libraries中添加libDatatistTracker.a。当前的libDatatistTracker.a 已经通过lipo集成了simulator环境和iphoneos环境，可以在开发和发布环境下工作。![](https://tanhaiwei.gitbooks.io/test/content/assets/iOS_3.png)​
+转到Build Phases设置下,在Link Binary With Libraries中添加libDatatistTracker.a。当前的libDatatistTracker.a 已经通过lipo集成了simulator环境和iphoneos环境，可以在开发和发布环境下工作。​
 
 在每个需要引入数据采集的.m 文件中引入如下.h文件
 
@@ -87,25 +84,9 @@ Appdelegate.m中的didFinishLaunchingWithOptions方法中调用来实现Datatist
 ```
 static NSString * const DatatistProductionServerURL = @"https://tracker.datatist.com/c.gif";
 static NSString * const DatatistProductionSiteID = @"xxxxxxxxxx";//营销云上创建应用的siteid
-static NSString * const Datatist_1_ProductionServerURL = @"https://tracker.analyzer.datatist.cn";//不接入数据云1.0，则不需要此参数
-static NSString * const Datatist_1_ProductionSiteID = @"xxxxxx";//实施人员提供OSiteid，不接入数据云1.0，则不需要此参数
 ```
 
-**初始化分为多种，根据不同需求，调用不同初始化方法：**
-
-**同时接入营销云和数据云（AutoTrack为页面自动采集开关，如不需要，可设置false关闭）**
-
-```
-[DatatistTracker initWithSiteID:DatatistProductionSiteID 
-baseURL:[NSURL URLWithString:DatatistProductionServerURL] 
-AutoTrack:(BOOL)true
-Site_1_ID:Datatist_1_ProductionSiteID 
-Base_1_URL:[NSURL URLWithString: Datatist_1_ProductionServerURL]];
-//设置项目ID
-[DatatistTracker sharedInstance].projectId = @“营销云-项目管理中的项目ID”;
-```
-
-**接入营销云，不接入数据云（AutoTrack为页面自动采集开关）**
+**初始化方法（AutoTrack为页面自动采集开关）**
 
 ```
 [DatatistTracker initWithSiteID:DatatistProductionSiteID 
@@ -128,6 +109,24 @@ AutoTrack:(BOOL)true];
 ```
 
 **重设siteId:某些情况需要重设siteId时，调用如下接口进行设置**
+
+```
+[DatatistTracker sharedInstance].resetSiteId = @"新siteId";
+```
+
+**GPS定位功能**
+
+在初始化后设置，功能默认关闭
+
+```
+[[DatatistTracker sharedInstance] enableGPSTrack:YES];
+```
+
+**跨项目数据分发**
+
+APP跳转到内嵌H5时，如果H5也集成了sdk，并且projectId不同。则消息会给APP和H5各发一份。
+
+在初始化后设置，功能默认关闭
 
 ```
 [DatatistTracker sharedInstance].resetSiteId = @"新siteId";
