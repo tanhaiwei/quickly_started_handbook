@@ -51,7 +51,7 @@ dependencies {
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    
+
 <application
     android:name=".MyApplication"
     android:allowBackup="true"
@@ -65,7 +65,7 @@ dependencies {
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
-        
+
         <!--请添加这里的整个 datatist_url_scheme intent-filter 区块 -->
         <intent-filter>
             <data android:scheme="@string/datatist_url_scheme"/>

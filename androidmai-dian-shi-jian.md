@@ -86,11 +86,7 @@ Track.track().pageview().setTitle("页面标题").setUrl(“当前activity路径
 **接口声明**
 
 ```
-public Event customerTrack(@NonNull String eventName, Map
-<
-String, Object
->
- udVariable)
+public Event customerTrack(@NonNull String eventName, Map<String, Object> udVariable)
 ```
 
 **参数说明**
@@ -102,14 +98,7 @@ String, Object
 **示例**
 
 ```
-Map
-<
-String, Object
->
- eventMap = new HashMap
-<
->
-();
+Map<String, Object> eventMap = new HashMap<>();
 eventMap.put("key","value");
 eventMap.put("name","张三");
 Track.track().customerEvent().customerTrack("营销云-数据管理中的事件标识符",eventMap).submit(DatatistSDK.getTracker());
@@ -359,9 +348,7 @@ public Payment trackPayment(
 
 ```
 TrackerKernel tracker = DatatistSDK.getTracker();
-Track.track().payment().trackPayment("orderId-24316435A88Y2","支付宝
-&
-微信", true, 124502.023).submit(tracker);
+Track.track().payment().trackPayment("orderId-24316435A88Y2","支付宝&微信", true, 124502.023).submit(tracker);
 ```
 
 ### 8. 预充值 {#8-yu-chong-zhi}
@@ -426,10 +413,7 @@ Track.track().initJPushEvent().trackInitJPush(registrationID).submit(tracker);
 **接口声明**
 
 ```
-public JPushEvent trackJPush(
-    @NonNull PushInfo pushInfo, 
-    @NonNull Intent pushIntent
-)
+public JPushEvent trackJPush(@NonNull PushInfo pushInfo, @NonNull Intent pushIntent)
 ```
 
 **参数说明**
@@ -476,9 +460,7 @@ Track.track().downloadChannel().trackDownloadChannel("XX应用市场").submit(tr
 **接口声明**
 
 ```
-public OpenChannel trackOpenChannel(
-@NonNull String openChannelName
-)
+public OpenChannel trackOpenChannel(@NonNull String openChannelName)
 ```
 
 **参数说明**
@@ -499,14 +481,12 @@ Track.track().openChannel().trackOpenChannel("从xx应用打开").submit(tracker
 **接口声明**
 
 ```
-public Logout trackLogout(
-@NonNull String userId
-)
+public Logout trackLogout()
 ```
 
 **参数说明**
 
-* userId：用户ID
+* 无
 
 示例：
 
